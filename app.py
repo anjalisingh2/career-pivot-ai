@@ -1,69 +1,89 @@
 import streamlit as st
 import google.generativeai as genai
 
-# Page Config with Tool Name
-st.set_page_config(page_title="Smart Hiring Tool | Anjali Singh", layout="wide")
+# Page Configuration for a Startup Look
+st.set_page_config(page_title="Smart Hiring Tool | AI Career Engine", layout="wide")
 
-# Custom UI Styling
+# Professional UI Styling (Clean & Modern)
 st.markdown("""
     <style>
-    .main { background-color: #f4f7f6; }
-    .stHeader { color: #0078d4; }
-    .stButton>button { background-color: #28a745; color: white; border-radius: 8px; font-weight: bold; height: 3em; }
-    .report-box { background-color: #ffffff; padding: 20px; border-radius: 10px; border-left: 5px solid #0078d4; margin-bottom: 20px; }
+    .main { background-color: #ffffff; }
+    .stHeader { color: #1e3a8a; }
+    .stButton>button { 
+        background: linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%); 
+        color: white; border-radius: 8px; font-weight: bold; border: none; height: 3.5em;
+    }
+    .report-card { 
+        padding: 20px; border: 1px solid #e2e8f0; border-radius: 12px; 
+        background-color: #f8fafc; margin-top: 20px;
+    }
     </style>
     """, unsafe_allow_html=True)
 
-# Header Section
+# Product Branding
 st.title("🛡️ Smart Hiring Tool")
-st.markdown("##### *Empowering Candidates with 8+ Years of Recruiting Intelligence by Anjali Singh*")
+st.markdown("#### The Ultimate AI-Powered Bridge Between Candidates and Careers")
+st.write("Analyze. Optimize. Connect. Get hired by the world's top companies.")
 st.divider()
 
-# Sidebar for Key and Quick Expert Tips
+# Sidebar for Key & Instructions
 with st.sidebar:
-    st.header("⚙️ Control Panel")
-    api_key = st.text_input("Enter Gemini API Key", type="password")
+    st.header("🔑 Product Access")
+    api_key = st.text_input("Enter your API Key", type="password")
     st.divider()
-    st.markdown("### 🌟 Anjali's Microsoft Hack:")
-    st.info("Microsoft Noida ke recruiters **'Stakeholder Management'** aur **'Data-Driven Hiring'** keywords ko CV mein sabse pehle dekhte hain.")
+    st.markdown("""
+    ### 📖 How it Works:
+    1. **Upload Data:** Paste any Job Description and your current Resume.
+    2. **AI Analysis:** Our engine scans for ATS compatibility and skill gaps.
+    3. **Action Plan:** Get a customized cover letter and LinkedIn strategy.
+    """)
+    st.info("Perfect for: Software, Marketing, HR, Finance, and Sales roles.")
 
 if api_key:
     try:
         genai.configure(api_key=api_key)
+        # Dynamic model selection for stability
         available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
         model = genai.GenerativeModel(available_models[0])
         
         col1, col2 = st.columns(2)
         with col1:
-            st.markdown("### 🎯 Job Description")
-            jd_text = st.text_area("", height=200, placeholder="Paste JD here...")
+            st.subheader("🎯 Job Description")
+            jd_text = st.text_area("", height=250, placeholder="Paste the job requirements here...", key="jd")
         with col2:
-            st.markdown("### 📄 Your Resume")
-            resume_text = st.text_area("", height=200, placeholder="Paste Resume here...")
+            st.subheader("📄 Candidate Resume")
+            resume_text = st.text_area("", height=250, placeholder="Paste your resume text here...", key="resume")
 
-        if st.button("🚀 Generate Smart Analysis"):
+        if st.button("🚀 Run Smart Analysis"):
             if jd_text and resume_text:
-                with st.spinner('Smart Hiring Tool is analyzing...'):
+                with st.spinner('Our AI Recruiter is analyzing the match...'):
+                    # The Universal Prompt
                     prompt = f"""
-                    You are a Senior Recruitment Expert (Anjali Singh). Analyze the Resume: {resume_text} against JD: {jd_text}.
+                    You are a world-class Executive Recruiter and Career Coach. 
+                    Analyze the following Resume against the Job Description (JD).
                     
-                    Structure the output clearly:
-                    1. **Match Score**: Give a percentage.
-                    2. **Missing Keywords**: List 3-5 specific keywords for ATS.
-                    3. **Learning Roadmap**: Provide 2-3 YouTube or Coursera search links for missing skills.
-                    4. **Professional Cover Letter**: Write a short, impactful 3-paragraph cover letter.
-                    5. **HR Connect Strategy**: 
-                       - Provide a LinkedIn Boolean Search String to find the hiring team.
-                       - Provide a 2-line direct message for the Recruiter.
+                    RESUME: {resume_text}
+                    JD: {jd_text}
+                    
+                    Please provide a high-value response in these sections:
+                    1. **Executive Summary**: A quick fit-gap analysis.
+                    2. **Match Score**: A percentage based on skills, experience, and keywords.
+                    3. **ATS Keywords Gap**: List specific missing keywords crucial for ATS (like Workday, Greenhouse, Taleo).
+                    4. **Upskilling Roadmap**: 2-3 specific topics to learn with suggested YouTube/Coursera search queries.
+                    5. **Tailored Cover Letter**: A professional, persuasive cover letter.
+                    6. **Outreach Strategy**:
+                       - LinkedIn Boolean Search String to find the hiring team.
+                       - A high-conversion 'Cold Message' for the Recruiter.
                     """
                     response = model.generate_content(prompt)
                     
-                    st.markdown("---")
-                    st.subheader("📋 Your Personalized Action Plan")
+                    st.markdown("<div class='report-card'>", unsafe_allow_html=True)
+                    st.subheader("📊 Your Smart Career Report")
                     st.markdown(response.text)
+                    st.markdown("</div>", unsafe_allow_html=True)
             else:
-                st.error("Please fill both JD and Resume boxes.")
+                st.error("Please provide both the Job Description and Resume.")
     except Exception as e:
-        st.error(f"Error: {e}")
+        st.error(f"Configuration Error: {e}")
 else:
-    st.warning("👈 Please enter your API Key in the sidebar to start.")
+    st.warning("Please enter an API Key in the sidebar to activate the tool.")
