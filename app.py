@@ -13,7 +13,7 @@ if api_key:
         genai.configure(api_key=api_key)
         
         # Latest Model selection
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('models/gemini-1.5-flash')
         
         jd_text = st.text_area("Paste Job Description (JD) here:")
         resume_text = st.text_area("Paste your Resume text here:")
