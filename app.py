@@ -32,7 +32,7 @@ if api_key:
                     3. A professional Cold Email to the Hiring Manager.
                     """
                     # Content generation with latest syntax
-                    response = model.generate_content(content=prompt)
+                    response = model.generate_content(prompt)
                     st.success("Analysis Complete!")
                     st.markdown(response.text)
             else:
