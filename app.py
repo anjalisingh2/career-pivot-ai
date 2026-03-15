@@ -10,8 +10,7 @@ if api_key:
     try:
         genai.configure(api_key=api_key)
         # Hum generic model name use karenge jo sabse zyada stable hai
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        
+        model = genai.GenerativeModel('gemini-1.5-pro')        
         jd_text = st.text_area("Paste Job Description (JD) here:")
         resume_text = st.text_area("Paste your Resume text here:")
 
