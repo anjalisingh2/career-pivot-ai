@@ -10,24 +10,26 @@ if api_key:
     try:
         genai.configure(api_key=api_key)
         
-        # Sabse stable version jo har jagah chalta hai
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # Sabse pehle check karte hain aapke account mein kaunsa model available hai
+        available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
         
-        jd_text = st.text_area("Paste Job Description (JD) here:")
-        resume_text = st.text_area("Paste your Resume text here:")
+        if available_models:
+            # Jo bhi pehla working model mile, usse use karein
+            selected_model = available_models[0]
+            model = genai.GenerativeModel(selected_model)
+            
+            jd_text = st.text_area("Paste JD here:")
+            resume_text = st.text_area("Paste Resume here:")
 
-        if st.button("Analyze Profile"):
-            if jd_text and resume_text:
-                with st.spinner('Checking for available AI models...'):
-                    # Direct interaction bina kisi version prefix ke
-                    prompt = f"Resume: {resume_text}\nJD: {jd_text}\nProvide 3 improvement tips."
-                    response = model.generate_content(prompt)
-                    st.success("Analysis Complete!")
+            if st.button("Analyze Now"):
+                if jd_text and resume_text:
+                    response = model.generate_content(f"Resume: {resume_text}\nJD: {jd_text}\nAnalysis:")
+                    st.success(f"Connected via {selected_model}!")
                     st.write(response.text)
-            else:
-                st.error("Please fill both boxes.")
+        else:
+            st.error("Aapke API key par koi model available nahi hai.")
+            
     except Exception as e:
-        st.error(f"System Message: {e}")
-        st.info("Tip: Agar 404 aa raha hai, toh please AI Studio mein naya project banakar nayi key nikaalein.")
+        st.error(f"Error: {e}")
 else:
-    st.info("Sidebar mein API Key dalein.")
+    st.info("Please enter API Key in sidebar")
