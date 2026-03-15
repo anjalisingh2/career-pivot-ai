@@ -1,73 +1,61 @@
 import streamlit as st
 import google.generativeai as genai
 
-# Page Config for a Professional Look
-st.set_page_config(page_title="Career Pivot AI | Anjali Singh", layout="wide", initial_sidebar_state="expanded")
+# Page Config
+st.set_page_config(page_title="Career Pivot AI | Anjali Singh", layout="wide")
 
-# Custom CSS for Professional Branding
+# Custom CSS (Corrected parameter)
 st.markdown("""
     <style>
-    .main { background-color: #f5f7f9; }
-    .stButton>button { background-color: #0078d4; color: white; border-radius: 5px; width: 100%; }
-    .stTextArea>div>div>textarea { border-radius: 10px; }
+    .main { background-color: #f0f2f6; }
+    .stButton>button { background-color: #0078d4; color: white; height: 3em; border-radius: 5px; }
     </style>
-    """, unsafe_content_safe=True)
+    """, unsafe_allow_html=True)
 
-st.title("🎯 Career Pivot AI: Get Hired at Top Tech")
-st.markdown("---")
+st.title("🚀 Career Pivot AI: Resume Optimizer")
+st.write("Built by Anjali Singh | 8+ Years Recruiting Expertise")
 
-# Sidebar with Anjali's Expertise
+# Sidebar
 with st.sidebar:
-    st.image("https://img.icons8.com/fluency/96/artificial-intelligence.png")
-    st.header("Settings & Tips")
+    st.header("Settings")
     api_key = st.text_input("Enter Gemini API Key", type="password")
-    
     st.divider()
-    st.subheader("💡 Recruiter's Insider Tips")
-    st.info("""
-    **Anjali's Advice:**
-    1. **ATS Friendly:** Microsoft uses high-end ATS. Keywords like 'Stakeholder Management' & 'Data Integrity' are gold.
-    2. **The 2-Minute Rule:** If your resume isn't readable in 2 mins, it's out.
-    """)
+    st.info("💡 **Anjali's Tip:** Microsoft Noida searches for 'Full Life Cycle Recruiting' and 'Stakeholder Management' in resumes.")
 
 if api_key:
     try:
         genai.configure(api_key=api_key)
+        # Automatically picking the available model
         available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
         model = genai.GenerativeModel(available_models[0])
         
-        # Two Column Layout
         col1, col2 = st.columns(2)
         with col1:
-            st.markdown("### 📝 Paste Job Description")
-            jd_text = st.text_area("", height=250, placeholder="Paste the Microsoft/Google JD here...")
+            jd_text = st.text_area("🎯 Paste Job Description (JD):", height=250)
         with col2:
-            st.markdown("### 📄 Paste Your Resume")
-            resume_text = st.text_area("", height=250, placeholder="Paste your resume text here...")
+            resume_text = st.text_area("📄 Paste Your Resume:", height=250)
 
-        if st.button("🚀 Run Deep Analysis"):
+        if st.button("🚀 Analyze My Profile"):
             if jd_text and resume_text:
-                with st.spinner('Anjali\'s AI is analyzing your fit...'):
+                with st.spinner('Analyzing...'):
                     prompt = f"""
-                    Context: You are a Senior Talent Acquisition Specialist with 8+ years of experience (like Anjali Singh).
-                    Task: Analyze Resume: {resume_text} against JD: {jd_text}.
+                    Context: Senior Recruiter Analysis.
+                    Resume: {resume_text} 
+                    JD: {jd_text}
                     
-                    Output Format:
-                    1. Match Score: [X/100]
-                    2. Gap Analysis: Top 3 missing technical/soft skills.
-                    3. Resume Bullet Point: Rewrite 1 bullet point from the resume to better match this JD.
-                    4. LinkedIn Boolean Search String: Provide a search string to find the HR/Hiring Manager for this role.
-                    5. Cold Email: A high-impact 3-sentence email for the recruiter.
+                    Provide:
+                    1. Match Score (out of 100).
+                    2. Top 3 Missing Keywords.
+                    3. A professional Cold Email for the HR Manager.
+                    4. LinkedIn Boolean Search String to find the hiring team.
                     """
                     response = model.generate_content(prompt)
-                    
-                    st.success("Analysis Ready!")
-                    st.markdown("---")
+                    st.divider()
+                    st.success("Analysis Complete!")
                     st.markdown(response.text)
             else:
-                st.error("Please provide both inputs to start.")
-                
+                st.error("Please provide both inputs.")
     except Exception as e:
-        st.error(f"System Error: {e}")
+        st.error(f"Error: {e}")
 else:
-    st.warning("Please enter your API Key in the sidebar to activate the tool.")
+    st.warning("👈 Please enter your API Key in the sidebar.")
