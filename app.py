@@ -1,75 +1,73 @@
 import streamlit as st
 import google.generativeai as genai
 
-# App Branding & Title
-st.set_page_config(page_title="Smart Hiring Tool", page_icon="🛡️", layout="wide")
+# App Layout
+st.set_page_config(page_title="Smart Hiring Tool", page_icon="🛡️", layout="centered")
 
-# UI Styling for a Mobile-App Feel
+# Visual Styling (Mobile Friendly)
 st.markdown("""
     <style>
-    [data-testid="stSidebar"] { display: none; } /* Hide Sidebar for App feel */
-    .main { background-color: #f0f2f5; }
+    .main { background-color: #ffffff; }
+    .stTextArea textarea { border-radius: 15px; border: 1px solid #ddd; padding: 15px; }
     .stButton>button { 
-        background: linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%); 
-        color: white; border-radius: 25px; height: 3.5em; width: 100%; border: none;
+        background: #000000; color: white; border-radius: 25px; 
+        font-weight: bold; height: 3.5em; width: 100%; border: none;
     }
-    .card { background-color: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    .score-text { font-size: 32px; font-weight: bold; color: #1e3a8a; text-align: center; }
-    .tag { background-color: #fee2e2; color: #b91c1c; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: bold; margin-right: 5px; }
+    .result-card { 
+        background-color: #f8f9fa; padding: 20px; border-radius: 20px; 
+        border-left: 8px solid #28a745; margin-top: 20px;
+    }
+    .metric-box { text-align: center; padding: 10px; background: #e9ecef; border-radius: 10px; }
     </style>
     """, unsafe_allow_html=True)
 
-# API KEY FIX: 
-# Go to Streamlit Cloud Settings -> Secrets and add: GOOGLE_API_KEY = "YOUR_KEY_HERE"
-if "GOOGLE_API_KEY" in st.secrets:
-    api_key = st.secrets["GOOGLE_API_KEY"]
-else:
-    api_key = st.sidebar.text_input("Temporary API Key (Admin only)", type="password")
-
 st.title("🛡️ Smart Hiring Tool")
-st.write("Scan your resume. Fix the gaps. Get the job.")
+st.write("Get your Resume 'Industry-Ready' in seconds.")
 
-# Layout for Inputs
-col1, col2 = st.columns(2)
-with col1:
-    jd_input = st.text_area("🎯 Job Requirements", placeholder="Paste Job Description...", height=150)
-with col2:
-    resume_input = st.text_area("📄 Your Resume", placeholder="Paste Resume text...", height=150)
+# Sidebar - Key Input (Direct solution for now)
+with st.sidebar:
+    st.header("App Settings")
+    # Agar aapne Secrets setup nahi kiya, toh yahan key daalni hogi
+    user_api_key = st.text_input("Enter API Key to Activate", type="password")
+    st.info("Note: Once launched on Play Store, this will be hidden.")
 
-if st.button("RUN SMART ANALYSIS"):
-    if jd_input and resume_input and api_key:
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        
-        with st.spinner('Smart Engine is Calculating...'):
-            # Prompt for VISUAL/SHORT output
-            prompt = f"""
-            Role: Expert Career Coach. 
-            Inputs: Resume: {resume_input}, JD: {jd_input}.
-            Output must be SHORT and use Emojis.
-            Format:
-            1. SCORE: [0-100]% 
-            2. MISSING: [Comma separated list of 5 keywords]
-            3. FIX: [1 sentence advice]
-            4. EMAIL: [2 line cold email]
-            5. CONNECT: [LinkedIn Boolean String]
-            """
-            response = model.generate_content(prompt)
-            res_text = response.text
+# Main Inputs
+jd_text = st.text_area("🎯 Job Requirements", placeholder="What are they looking for?", height=150)
+resume_text = st.text_area("📄 Your Resume", placeholder="Paste your resume content...", height=150)
 
-            # Displaying as Visual Cards
-            st.markdown("---")
-            c1, c2, c3 = st.columns([1,2,1])
-            
-            with c2:
-                st.markdown("<div class='card'>", unsafe_allow_html=True)
-                st.markdown(f"<div class='score-text'>Match Score: {res_text.split('SCORE:')[1].split('2.')[0]}</div>", unsafe_allow_html=True)
-                st.progress(75) # Dynamic calculation can be added
-                st.markdown("</div>", unsafe_allow_html=True)
-
-            # Split logic for visuals
-            st.markdown("### 🛠️ Quick Action Plan")
-            st.write(res_text) # This will now be short as per prompt
-            
+if st.button("GENERATE SMART REPORT"):
+    # Check if everything is provided
+    if not user_api_key:
+        st.error("Missing: Please enter your API Key in the sidebar.")
+    elif not jd_text or not resume_text:
+        st.error("Missing: Please paste both Job Description and Resume.")
     else:
-        st.error("Please provide inputs.")
+        try:
+            genai.configure(api_key=user_api_key)
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            
+            with st.spinner('🚀 AI is calculating your fit...'):
+                prompt = f"""
+                You are an Expert Career Coach. 
+                Analyze Resume: {resume_text} vs JD: {jd_text}.
+                Keep it VERY SHORT, BOLD, and VISUAL with Emojis.
+                
+                Format:
+                1. MATCH: [Score]%
+                2. GAPS: [3-5 Keywords only]
+                3. ACTION: [1 line to improve]
+                4. CONNECT: [LinkedIn Boolean Search String]
+                5. MESSAGE: [2-line DM for HR]
+                """
+                response = model.generate_content(prompt)
+                
+                # Displaying Result in a "Card"
+                st.markdown("<div class='result-card'>", unsafe_allow_html=True)
+                st.subheader("📋 Smart Report")
+                st.markdown(response.text)
+                st.markdown("</div>", unsafe_allow_html=True)
+                
+                st.balloons() # Celebration effect for user!
+                
+        except Exception as e:
+            st.error(f"System Error: {e}")
